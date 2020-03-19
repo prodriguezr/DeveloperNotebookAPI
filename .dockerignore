@@ -5,7 +5,6 @@ Dockerfile
 README.md
 docker-compose.yml
 
-/git
-/bin
-/obj
+bin\
+obj\
 .env
