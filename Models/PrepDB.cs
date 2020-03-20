@@ -1,18 +1,17 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using System;
+using DeveloperNotebookAPI.Models.Entity;
 
 namespace DeveloperNotebookAPI.Models
 {
     public static class PrepDB
     {
-        public static void Population(IApplicationBuilder app)
+        public static void Population()
         {
-            using (var serviceScope = app.ApplicationServices.CreateScope())
+            using (var ctx = new MyDbContext())
             {
-                SeedData(serviceScope.ServiceProvider.GetService<MyDbContext>());
+                SeedData(ctx);
             }
         }
 

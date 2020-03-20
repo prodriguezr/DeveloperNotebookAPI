@@ -3,36 +3,55 @@ using Microsoft.AspNetCore.Mvc;
 using DeveloperNotebookAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using System.Threading.Tasks;
+using DeveloperNotebookAPI.Models.Entity;
 
 namespace DeveloperNotebookAPI.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]    
-    public class CategoriesController : MyControllerBase 
+    public class CategoriesController
     {
-        public CategoriesController(MyDbContext context) : base(context)
+        public CategoriesController()
         {}
 
         // GET: api/categories
         [HttpGet]
-        public ActionResult<IEnumerable<Category>> GetAll()
+        public async Task<IEnumerable<Category>> GetAllAsync()
         {
-            return myDbContext.Categories;
+            var categories = await GetAllCategoryAsync();
+
+            return categories;
+        }
+
+        private async Task<IEnumerable<Category>> GetAllCategoryAsync()
+        {
+            using (var ctx = new MyDbContext())
+            {
+                return await ctx.Categories.ToListAsync();
+            }
         }
 
         // GET: api/categories/3
         [HttpGet("{id}")]
-        public ActionResult<Category> GetCategoryById(int id)
+        public async Task<Category> GetCategoryById(int id)
         {
-            var category = myDbContext.Categories.Find(id);
-
-            if (category == null)
-                return NotFound();
-
-            return category;
+            using (var ctx = new MyDbContext())
+            {
+                return await GetCategoryByIdAsync(id);
+            }
         }
 
+        private async Task<Category> GetCategoryByIdAsync(int id)
+        {
+            using (var ctx = new MyDbContext())
+            {
+                return await ctx.Categories.FirstOrDefaultAsync(c => c.Id == id && c.ActiveRecord == true);
+            }
+        }
+
+/*
         // POST: api/categories
         [HttpPost]
         public ActionResult<Category> PostCategory(Category category)
@@ -70,5 +89,6 @@ namespace DeveloperNotebookAPI.Controllers
 
             return category;
         }
+*/
     }
 }

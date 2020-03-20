@@ -15,11 +15,8 @@ namespace DeveloperNotebookAPI.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]    
-   public class UsersController : MyControllerBase 
+    public class UsersController : MyControllerBase 
     {
-        public UsersController(MyDbContext context) : base(context)
-        {}
-
         [AllowAnonymous]
         [HttpPost("authenticate")]
         public ActionResult Authenticate([FromBody]AuthenticateModel model)
@@ -29,12 +26,12 @@ namespace DeveloperNotebookAPI.Controllers
             if (vUser == null)
                 return BadRequest(new { message = "Username or password is incorrect" });
 
-            UpdateUserToken(vUser.Id, vUser.Token);
+            UpdateUserToken(vUser);
 
             return Ok(vUser);
         }
 
-        private static bool UpdateUserToken(int userId, string token) 
+        private static bool UpdateUserToken(User thisUser) 
         {
             bool vReturn;
 
@@ -44,14 +41,14 @@ namespace DeveloperNotebookAPI.Controllers
                 using (var ctx = new MyDbContext())
                 {
                     var vMyUser = ctx.Users
-                                    .Where(u => u.Id == userId)
+                                    .Where(u => u.Id.Equals(thisUser.Id))
                                     .FirstOrDefault<User>();
                     
                     if (vMyUser == null)
                         vReturn = false;
                     else
                     {
-                        vMyUser.Token = token;
+                        vMyUser.Token = thisUser.Token;
                         ctx.SaveChanges();
 
                         vReturn = true;                  
@@ -70,33 +67,42 @@ namespace DeveloperNotebookAPI.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<User>> GetAll()
         {
-            return myDbContext.Users;
+            using (var ctx = new MyDbContext())
+            {
+                if (ctx.Users.Any())
+                    return Ok(ctx.Users);
+
+                return NoContent();
+            }
         }
 
-        private static User ExistUser(string username, out bool exists)
+        // GET: api/users/2
+        [HttpGet("{id}")]
+        private ActionResult<User> GetUserById(int id)
         {
             using (var ctx = new MyDbContext())
             {
-                var vUser = ctx.Users
-                                .Where(s => s.Username == username)
-                                .FirstOrDefault<User>();
+                var user = ctx.Users.FirstOrDefault(u => u.Id.Equals(id));
 
-                exists = vUser == null ? false : true;
+                if (user != null)
+                    return Ok(user);
 
-                return vUser;
+                return NotFound();
             }
         }
-        private User Authenticate(string username, string password)
-        {
-            User vUser = null;
 
+        private static User GetUserByName(string username)
+        {
             using (var ctx = new MyDbContext())
             {
-                vUser = ctx.Users
-                        .Where(s => s.Username == username)
-                        .FirstOrDefault<User>();
+                return ctx.Users.FirstOrDefault(u => u.Username.Equals(username));
             }
-            
+        }
+
+        private static User Authenticate(string username, string password)
+        {
+            User vUser = GetUserByName(username);
+
             if (vUser == null)
                 return null;
 
@@ -128,6 +134,5 @@ namespace DeveloperNotebookAPI.Controllers
             
             return tokenHandler.WriteToken(token);
         }
-
     }
 }

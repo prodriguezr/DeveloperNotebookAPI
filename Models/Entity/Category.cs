@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DeveloperNotebookAPI.Models
+namespace DeveloperNotebookAPI.Models.Entity
 {
-    public class Category : EntityBase
+    public class Category : AuditableEntity
     { 
         [StringLength(40)]
         [Required]

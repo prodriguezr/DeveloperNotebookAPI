@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace DeveloperNotebookAPI.Models
+namespace DeveloperNotebookAPI.Models.Entity
 {
-    public class Command : EntityBase
+    public class Command : AuditableEntity
     {
         [Required]
         [StringLength(50)]

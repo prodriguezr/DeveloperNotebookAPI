@@ -1,9 +1,8 @@
 
 using System;
-using System.IO;
+using DeveloperNotebookAPI.Models.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json.Linq;
 
 namespace DeveloperNotebookAPI.Models
 {
